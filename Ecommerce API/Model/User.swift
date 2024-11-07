@@ -14,3 +14,20 @@ struct User: Codable {
     let email: String
     let role: String
 }
+
+struct Login: Codable{
+    let data: String
+}
+
+
+struct ApiResponse<T: Codable>: Codable {
+    let data: T
+    let msg: String?
+    let status: Int
+}
+
+struct DataResponse<T: Codable>: Codable {
+    let data: T
+    let msg: String?
+}
+
