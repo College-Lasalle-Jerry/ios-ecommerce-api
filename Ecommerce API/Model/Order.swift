@@ -10,7 +10,7 @@ import Foundation
 
 struct Order: Codable {
     let _id: String
-    let user: User // Reference to the user who placed the order
+    let user: String // Reference to the user who placed the order
     let totalAmount: Double
     let status: String
     let orderDate: Date
@@ -18,6 +18,6 @@ struct Order: Codable {
 }
 
 struct OrderProduct: Codable {
-    let product: Product
+    let product: String
     let quantity: Int
 }

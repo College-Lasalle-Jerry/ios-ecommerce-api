@@ -9,8 +9,8 @@ import Foundation
 
 
 struct Address: Codable {
-    let id: String
-    let user: User
+    let _id: String
+    let user: String
     let street: String
     let city: String
     let state: String

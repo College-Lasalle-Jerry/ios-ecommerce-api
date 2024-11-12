@@ -50,6 +50,13 @@ public class NetworkManager {
         self.token = token
     }
     
+    struct Response<T: Codable>: Codable {
+        let data: T
+        let msg: String
+        let status: Int
+    }
+
+    
     private func request<T: Codable>(endpoint: String, method: String = "GET", body: Data? = nil) async throws -> T {
         guard let url = URL(string: "\(baseURL)\(endpoint)")
         else {
@@ -79,7 +86,7 @@ public class NetworkManager {
     }
     
     // Authentication
-    func register(name: String, email: String, password: String) async throws -> String? {
+    func register(name: String, email: String, password: String) async throws -> Response<String> {
         let registerData = ["name": name, "email": email, "password": password]
         let data = try JSONEncoder().encode(registerData)
         struct registerStructure: Codable {
@@ -89,13 +96,14 @@ public class NetworkManager {
         let result: registerStructure = try await request(endpoint: "/auth/register", method: "POST", body: data)
         
         if !result.msg.isEmpty {
-            return nil // unauthorised
+            return Response(data: "", msg: result.msg, status: 400)
         }
         
-        return result.data
+        return Response(data: result.data, msg: "Account Created", status: 200)
     }
     
-    func login(email: String, password: String) async throws -> String? {
+        
+    func login(email: String, password: String) async throws -> Response<String> {
         let loginData = ["email": email, "password": password]
         let data = try JSONEncoder().encode(loginData)
         struct LoginResponse: Codable {
@@ -104,35 +112,37 @@ public class NetworkManager {
         }
         let result: LoginResponse = try await request(endpoint: "/auth/login", method: "POST", body: data)
         if !result.msg.isEmpty {
-            return nil // unauthorised
+            return Response(data: result.data, msg: result.msg, status: 400) // unauthorised
+//            return nil
         }
         setToken(result.data)
-        return result.data
+        return Response(data: result.data, msg: result.msg, status: 200)
+//        return result.data
     }
     
-    func fetchUserProfile() async throws -> User? {
+    func fetchUserProfile() async throws -> Response<User> {
         struct UserResponse: Codable {
             let data: User
             let msg: String
         }
         let result: UserResponse = try await request(endpoint: "/auth/profile")
         if !result.msg.isEmpty {
-            return nil
+            return Response(data: [] as! User, msg: result.msg, status: 400)
         }
-        return result.data
+        return Response(data: result.data, msg: "User Details", status: 200)
     }
     
     // Product APIs
-    func fetchProducts() async throws -> [Product]? {
+    func fetchProducts() async throws -> Response<[Product]> {
         struct productResponse: Codable {
             let data: [Product]
             let msg: String
         }
         let result: productResponse = try await request(endpoint: "/products")
         if !result.msg.isEmpty {
-            return nil
+            return Response(data: [] as! [Product], msg: result.msg, status: 400)
         }
-        return result.data
+        return Response(data: result.data, msg: result.msg, status: 400)
         
     }
     
@@ -148,25 +158,61 @@ public class NetworkManager {
 //    }
 //    
     // Address APIs
-//    func addAddress(street: String, city: String, state: String, zip: String) async throws -> Address {
-//        let addressData = ["street": street, "city": city, "state": state, "zip": zip]
-//        let data = try JSONEncoder().encode(addressData)
-//        return try await request(endpoint: "/addresses", method: "POST", body: data)
-//    }
+    func addAddress(street: String, city: String, state: String, zip: String) async throws -> Response<Address> {
+        let addressData = ["street": street, "city": city, "state": state, "zip": zip]
+        let data = try JSONEncoder().encode(addressData)
+        struct AddressResponse: Codable {
+            let data: Address
+            let msg: String
+        }
+        let result: AddressResponse = try await request(endpoint: "/addresses", method: "POST", body: data)
+        if !result.msg.isEmpty {
+            return Response(data: [] as! Address, msg: result.msg, status: 400)
+        }
+        
+        return Response(data: result.data, msg: result.msg, status: 200)
+        
+    }
 //    
-//    func fetchAddresses() async throws -> [Address] {
-//        return try await request(endpoint: "/addresses")
-//    }
+    func fetchAddresses() async throws -> Response<[Address]> {
+        struct AddressResponse: Codable {
+            let data: [Address]
+            let msg: String
+            
+        }
+        let result: AddressResponse =  try await request(endpoint: "/addresses")
+        if !result.msg.isEmpty {
+            return Response(data: [] as! [Address], msg: result.msg, status: 400)
+        }
+        return Response(data: result.data, msg: "Address fetched successfully", status: 200)
+    }
 //    
-//    func updateAddress(addressId: String, street: String, city: String, state: String, zip: String) async throws -> Address {
-//        let addressData = AddressRequest(street: street, city: city, state: state, zip: zip)
-//        let data = try JSONEncoder().encode(addressData)
-//        return try await request(endpoint: "/addresses/\(addressId)", method: "PUT", body: data)
-//    }
+    func updateAddress(addressId: String, street: String, city: String, state: String, zip: String) async throws -> Response<Address> {
+        let addressData = AddressRequest(street: street, city: city, state: state, zip: zip)
+        let data = try JSONEncoder().encode(addressData)
+        struct UpdateAddressResponse: Codable {
+            let data: Address
+            let msg: String
+        }
+        let result: UpdateAddressResponse =  try await request(endpoint: "/addresses/\(addressId)", method: "PUT", body: data)
+        if !result.msg.isEmpty {
+            return Response(data: [] as! Address, msg: result.msg, status: 400)
+        }
+        return Response(data: result.data, msg: "Address updated successfully", status: 200)
+    }
     
-//    func deleteAddress(addressId: String) async throws {
-//        _ = try await request(endpoint: "/addresses/\(addressId)", method: "DELETE") as Address?
-//    }
+    func deleteAddress(addressId: String) async throws -> Response<String> {
+        
+        struct DeleteAddressResponse: Codable {
+            let msg: String
+            let status: Int
+        }
+        let result: DeleteAddressResponse = try await request(endpoint: "/addresses/\(addressId)", method: "DELETE")
+        if !result.msg.isEmpty {
+            return Response(data: "", msg: result.msg, status: result.status)
+        }
+        return Response(data: result.msg, msg: "Address deleted successfully", status: result.status)
+    }
 //    
 //    // Orders
 //    func fetchUserOrders() async throws -> [Order] {
