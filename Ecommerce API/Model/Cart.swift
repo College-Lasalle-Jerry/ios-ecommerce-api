@@ -9,6 +9,7 @@ import Foundation
 
 
 struct Cart: Codable {
+    let _id: String
     let user: String
     let products: [CartProduct]
 }
@@ -16,9 +17,10 @@ struct Cart: Codable {
 struct CartProduct: Codable {
     let product: String
     let quantity: Int
+    let _id: String
 }
 
 struct CartRequest: Codable {
-    let product: String
+    let productId: String
     let quantity: Int
 }

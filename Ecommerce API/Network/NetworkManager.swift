@@ -20,7 +20,7 @@ extension URLSession: URLSessionProtocol {}
 class MockURLSession: URLSessionProtocol {
     var nextData: Data? // Holds the mock data to return when a request is made
     var nextError: Error? //     // Holds an error to throw when a request is made, useful for simulating failures
-
+    
     var lastURL: URL? // Stores the URL of the last request made, allowing test assertions to be made about the request
     
     func data(for request: URLRequest) async throws -> (Data, URLResponse) {
@@ -40,7 +40,7 @@ public class NetworkManager {
     private var token: String?
     private var session: URLSessionProtocol
     
-//    private init() {}
+    //    private init() {}
     
     init(session: URLSessionProtocol = URLSession.shared) { // Use URLSessionProtocol here
         self.session = session
@@ -55,7 +55,7 @@ public class NetworkManager {
         let msg: String
         let status: Int
     }
-
+    
     
     private func request<T: Codable>(endpoint: String, method: String = "GET", body: Data? = nil) async throws -> T {
         guard let url = URL(string: "\(baseURL)\(endpoint)")
@@ -75,13 +75,16 @@ public class NetworkManager {
         }
         
         let (data, response) = try await URLSession.shared.data(for: request)
-//        guard let httpResponse = response as? HTTPURLResponse, 200..<300 ~= httpResponse.statusCode else {
-//            throw URLError(.badServerResponse)
-//        }
+        //        guard let httpResponse = response as? HTTPURLResponse, 200..<300 ~= httpResponse.statusCode else {
+        //            throw URLError(.badServerResponse)
+        //        }
         guard response is HTTPURLResponse else {
             throw URLError(.badServerResponse)
         }
-
+        
+        let result = try JSONDecoder().decode(T.self, from: data)
+        print("Result \(result)")
+        
         return try JSONDecoder().decode(T.self, from: data)
     }
     
@@ -102,7 +105,7 @@ public class NetworkManager {
         return Response(data: result.data, msg: "Account Created", status: 200)
     }
     
-        
+    
     func login(email: String, password: String) async throws -> Response<String> {
         let loginData = ["email": email, "password": password]
         let data = try JSONEncoder().encode(loginData)
@@ -113,11 +116,11 @@ public class NetworkManager {
         let result: LoginResponse = try await request(endpoint: "/auth/login", method: "POST", body: data)
         if !result.msg.isEmpty {
             return Response(data: result.data, msg: result.msg, status: 400) // unauthorised
-//            return nil
+            //            return nil
         }
         setToken(result.data)
         return Response(data: result.data, msg: result.msg, status: 200)
-//        return result.data
+        //        return result.data
     }
     
     func fetchUserProfile() async throws -> Response<User> {
@@ -146,17 +149,36 @@ public class NetworkManager {
         
     }
     
-//    // Cart APIs
-//    func addToCart(productId: String, quantity: Int) async throws -> Cart {
-//        let cartData = CartRequest(product: productId, quantity: quantity)
-//        let data = try JSONEncoder().encode(cartData)
-//        return try await request(endpoint: "/cart/add", method: "POST", body: data)
-//    }
-//    
-//    func checkoutCart() async throws -> Order {
-//        return try await request(endpoint: "/cart/checkout", method: "POST")
-//    }
-//    
+    //    // Cart APIs
+    func addToCart(productId: String, quantity: Int) async throws -> Response<Cart> {
+        let cartData = CartRequest(productId: productId, quantity: quantity)
+        let data = try JSONEncoder().encode(cartData)
+        struct CartResponse: Codable {
+            let data: Cart
+            let msg: String
+            let status: Int
+        }
+        let result: CartResponse =  try await request(endpoint: "/cart/add", method: "POST", body: data)
+        print(result)
+        if result.status != 200 {
+            return Response(data: [] as! Cart, msg: result.msg, status: result.status)
+        }
+        return Response(data: result.data, msg: result.msg, status: result.status)
+    }
+    //
+    func checkoutCart() async throws -> Response<Int> {
+        struct CheckoutResponse: Codable {
+            let data: Int
+            let msg: String
+            let status: Int
+        }
+        let result: CheckoutResponse = try await request(endpoint: "/cart/checkout", method: "POST")
+        if result.status != 200 {
+            return Response(data: 0, msg: result.msg, status: result.status)
+        }
+        return Response(data: result.data, msg: result.msg, status: 200)
+    }
+    //
     // Address APIs
     func addAddress(street: String, city: String, state: String, zip: String) async throws -> Response<Address> {
         let addressData = ["street": street, "city": city, "state": state, "zip": zip]
@@ -173,7 +195,7 @@ public class NetworkManager {
         return Response(data: result.data, msg: result.msg, status: 200)
         
     }
-//    
+    //
     func fetchAddresses() async throws -> Response<[Address]> {
         struct AddressResponse: Codable {
             let data: [Address]
@@ -186,7 +208,7 @@ public class NetworkManager {
         }
         return Response(data: result.data, msg: "Address fetched successfully", status: 200)
     }
-//    
+    //
     func updateAddress(addressId: String, street: String, city: String, state: String, zip: String) async throws -> Response<Address> {
         let addressData = AddressRequest(street: street, city: city, state: state, zip: zip)
         let data = try JSONEncoder().encode(addressData)
@@ -213,9 +235,9 @@ public class NetworkManager {
         }
         return Response(data: result.msg, msg: "Address deleted successfully", status: result.status)
     }
-//    
-//    // Orders
-//    func fetchUserOrders() async throws -> [Order] {
-//        return try await request(endpoint: "/order")
-//    }
+    //
+    //    // Orders
+    //    func fetchUserOrders() async throws -> [Order] {
+    //        return try await request(endpoint: "/order")
+    //    }
 }
