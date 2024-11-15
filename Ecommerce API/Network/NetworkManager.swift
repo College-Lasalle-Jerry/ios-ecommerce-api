@@ -44,11 +44,22 @@ public class NetworkManager {
     
     init(session: URLSessionProtocol = URLSession.shared) { // Use URLSessionProtocol here
         self.session = session
+        
+        self.token = UserDefaults.standard.string(forKey: "userToken")
     }
     
     func setToken(_ token: String) {
         self.token = token
+        // Save token to UserDefaults for persistence
+        UserDefaults.standard.set(token, forKey: "userToken")
     }
+    
+    func clearToken() {
+        self.token = nil
+        // Remove token from UserDefaults
+        UserDefaults.standard.removeObject(forKey: "userToken") // after we set the token in login/register
+    }
+    
     
     struct Response<T: Codable>: Codable {
         let data: T
@@ -107,7 +118,7 @@ public class NetworkManager {
     
     
     func login(email: String, password: String) async throws -> Response<String> {
-        let loginData = ["email": email, "password": password]
+        let loginData = ["email": email.lowercased(), "password": password.lowercased()]
         let data = try JSONEncoder().encode(loginData)
         struct LoginResponse: Codable {
             let data: String
@@ -145,7 +156,7 @@ public class NetworkManager {
         if !result.msg.isEmpty {
             return Response(data: [] as! [Product], msg: result.msg, status: 400)
         }
-        return Response(data: result.data, msg: result.msg, status: 400)
+        return Response(data: result.data, msg: result.msg, status: 200)
         
     }
     
