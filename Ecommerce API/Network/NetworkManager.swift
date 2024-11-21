@@ -37,7 +37,7 @@ class MockURLSession: URLSessionProtocol {
 public class NetworkManager {
     static let shared = NetworkManager()
     private let baseURL = "https://api.jerryjoy.me/api"
-    private var token: String?
+    var token: String?
     private var session: URLSessionProtocol
     
     //    private init() {}

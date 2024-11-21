@@ -12,25 +12,31 @@ struct ContentView: View {
     //    @State private var isLoggedIn: Bool = UserDefaults.standard.string(forKey: "userToken") != nil
     @State private var isLoggedIn: Bool = false
     
-    init() {
-        checkTokenValidity()
-    }
+//    init() {
+//        checkTokenValidity()
+//    } will not work, we cannot change the state before the view is loaded.
+    // the state variable isLoggedIn can be changed only during or after the view is loaded.
     
     var body: some View {
         NavigationStack {
             if isLoggedIn {
                 //
-                HomeView()
+                HomeView(isLoggedIn: $isLoggedIn) // pass the binding here.
             } else {
                 LoginView(isLoggedIn: $isLoggedIn)
             }
+        }
+        .onAppear{
+            checkTokenValidity()
         }
     }
     
     private func checkTokenValidity() {
         if let token = UserDefaults.standard.string(forKey: "userToken") {
+            print("Token: \(token)")
             isLoggedIn = !isJWTExpired(token)  // Check token validity and expiry
         } else {
+            print("No token found.")
             isLoggedIn = false
         }
     }

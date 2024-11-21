@@ -21,106 +21,102 @@ struct AddressView: View {
     @State private var newZip = ""
     
     var body: some View {
-        NavigationStack {
-            VStack {
-                Text("My Addresses")
-                    .font(.title)
-                    .fontWeight(.bold)
-                if isLoading {
-                    ProgressView("Loading addresses...")
-                        .padding()
-                } else if let errorMessage = errorMessage {
-                    Text("Error: \(errorMessage)")
-                        .foregroundColor(.red)
-                        .padding()
-                } else if addresses.isEmpty {
-                    Text("No addresses available.")
-                        .padding()
-                } else {
-                    List{
-                        ForEach(addresses, id: \._id) {
-                            address in
-                            AddressRowView(address: address)
-                                .onTapGesture {
-                                    editingAddress = address
-                                    newStreet = address.street
-                                    newCity = address.city
-                                    newState = address.state
-                                    newZip = address.zip
-                                    showEditAddressForm.toggle()
-                                }
-                        }.onDelete(perform: deleteAddress)
-                        
-                    }
-                    .listStyle(PlainListStyle())
-                }
-                
-                Button(action: {
-                    showAddAddressForm.toggle()
-                }) {
-                    Text("Add New Address")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundStyle(.white)
-                        .cornerRadius(8)
-                }.padding()
-            }
-            //            .navigationTitle("Addresses")
-            .task {
-                await loadAddresses()
-            }
-            .sheet(isPresented: $showAddAddressForm) {
-                VStack{
-                    Text("Add Address")
-                    TextField("Street", text: $newStreet)
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .cornerRadius(8)
-                    TextField("City", text: $newCity)
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .cornerRadius(8)
-                    TextField("State", text: $newState)
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .cornerRadius(8)
-                    TextField("Zip Code", text: $newZip)
-                        .padding()
-                        .background(Color(.secondarySystemBackground))
-                        .cornerRadius(8)
-                    
-                    Button("Save Address"){
-                        Task {
-                            await addAddress()
-                        }
-                    }
+        VStack {
+            if isLoading {
+                ProgressView("Loading addresses...")
                     .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-                }
-                .padding()
-            }
-            .sheet(isPresented: $showEditAddressForm) {
-                VStack {
-                    Text("Edit Address")
-                    addressForm()
-                    Button("Update Address") {
-                        Task {
-                            if let editingAddress = editingAddress {
-                                await editAddress(addressId: editingAddress._id)
+            } else if let errorMessage = errorMessage {
+                Text("Error: \(errorMessage)")
+                    .foregroundColor(.red)
+                    .padding()
+            } else if addresses.isEmpty {
+                Text("No addresses available.")
+                    .padding()
+            } else {
+                List{
+                    ForEach(addresses, id: \._id) {
+                        address in
+                        AddressRowView(address: address)
+                            .onTapGesture {
+                                editingAddress = address
+                                newStreet = address.street
+                                newCity = address.city
+                                newState = address.state
+                                newZip = address.zip
+                                showEditAddressForm.toggle()
                             }
-                        }
-                    }
-                    .padding()
+                    }.onDelete(perform: deleteAddress)
+                    
+                }
+                .listStyle(PlainListStyle())
+            }
+            
+            Button(action: {
+                showAddAddressForm.toggle()
+            }) {
+                Text("Add New Address")
                     .frame(maxWidth: .infinity)
-                    .background(Color.orange)
-                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundStyle(.white)
                     .cornerRadius(8)
+            }.padding()
+        }
+        .sheet(isPresented: $showAddAddressForm) {
+            VStack{
+                Text("Add Address")
+                TextField("Street", text: $newStreet)
+                    .padding()
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(8)
+                TextField("City", text: $newCity)
+                    .padding()
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(8)
+                TextField("State", text: $newState)
+                    .padding()
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(8)
+                TextField("Zip Code", text: $newZip)
+                    .padding()
+                    .background(Color(.secondarySystemBackground))
+                    .cornerRadius(8)
+                
+                Button("Save Address"){
+                    Task {
+                        await addAddress()
+                    }
                 }
                 .padding()
+                .frame(maxWidth: .infinity)
+                .background(Color.green)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+            }
+            .padding()
+        }
+        .sheet(isPresented: $showEditAddressForm) {
+            VStack {
+                Text("Edit Address")
+                addressForm()
+                Button("Update Address") {
+                    Task {
+                        if let editingAddress = editingAddress {
+                            await editAddress(addressId: editingAddress._id)
+                        }
+                    }
+                }
+                .padding()
+                .frame(maxWidth: .infinity)
+                .background(Color.orange)
+                .foregroundColor(.white)
+                .cornerRadius(8)
+            }
+            .padding()
+        }
+        .onAppear {
+            Task {
+                await loadAddresses()
             }
             
         }
@@ -128,6 +124,7 @@ struct AddressView: View {
     // Function to load addresses from the network
     private func loadAddresses() async {
         do {
+            print("Token address: \(NetworkManager.shared.token)")
             let response = try await NetworkManager.shared.fetchAddresses()
             if response.status == 200 {
                 addresses = response.data
@@ -140,7 +137,7 @@ struct AddressView: View {
         isLoading = false
     }
     
-        
+    
     // Function to add a new address
     private func addAddress() async {
         do {
@@ -183,7 +180,7 @@ struct AddressView: View {
             }
         }
     }
-
+    
     
     
     private func addressForm() -> some View {

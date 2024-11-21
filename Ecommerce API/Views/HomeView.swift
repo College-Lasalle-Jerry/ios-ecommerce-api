@@ -7,22 +7,46 @@
 
 import SwiftUI
 
+enum Tabs: String{
+    case products
+    case address
+}
+
 struct HomeView: View {
+    @Binding var isLoggedIn: Bool
+    @State private var selectedTab: Tabs = .products // Track the selected tab
     var body: some View {
-        TabView {
-            ProductsView()
-                .tabItem{
-                    Image(systemName: "bag.badge.plus.fill")
+            TabView(selection: $selectedTab) {
+                ProductsView()
+                    .tabItem{
+                        Image(systemName: "bag.badge.plus.fill")
+                    }
+                    .tag(Tabs.products)
+                
+                AddressView()
+                    .tabItem{
+                        Image(systemName: "map.fill")
+                    }
+                    .tag(Tabs.address)
+            }
+        .navigationTitle(selectedTab.rawValue.capitalized)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: logout){
+                    Image(systemName: "power")
+                        .foregroundStyle(.red)
                 }
+            }
             
-            AddressView()
-                .tabItem{
-                    Image(systemName: "map.fill")
-                }
         }
+        .navigationViewStyle(StackNavigationViewStyle())
+    }
+    private func logout() {
+        NetworkManager.shared.clearToken()
+        isLoggedIn = false
     }
 }
 
 #Preview {
-    HomeView()
+    HomeView(isLoggedIn: .constant(true))
 }

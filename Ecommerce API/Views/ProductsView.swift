@@ -16,43 +16,42 @@ struct ProductsView: View {
     private let columns = [GridItem(.flexible()), GridItem(.flexible())] // 3 columns in the grid
     
     var body: some View {
-        NavigationView {
-            VStack {
-                if isLoading {
-                    ProgressView("Loading products...") // Loading indicator with a message
-                        .padding()
-                }
-                else if let errorMessage = errorMessage {
-                    Text("Error: \(errorMessage)") // Display error message if an error occurs
-                        .foregroundColor(.red)
-                        .padding()
-                }
-                else if products.isEmpty {
-                    Text("No products available.") // Message if no products are available
-                        .padding()
-                } else {
-                    //                    List(products, id: \._id) { product in
-                    //                        ProductRowView(product: product)
-                    //                    }
-                    //                    .listStyle(PlainListStyle())
-                    
-                    ScrollView {
-                        LazyVGrid(columns: columns, spacing: 20) {
-                            ForEach(products, id: \._id) { product in
-                                ProductRowView(product: product) // Reuse the product row view for each product
-                                    .frame(maxWidth: .infinity) // Make each grid item take full width
-                                    .background(Color.white) // Optional background color for the grid item
-                                    .cornerRadius(10) // Optional corner radius for the grid item
-                                    .shadow(radius: 5) // Optional shadow for visual effect
-                            }
-                        }
-                        .padding()
-                    }
-                }
-                Spacer()
+        VStack {
+            if isLoading {
+                ProgressView("Loading products...") // Loading indicator with a message
+                    .padding()
             }
-            .navigationTitle("Products")
-            .task {
+            else if let errorMessage = errorMessage {
+                Text("Error: \(errorMessage)") // Display error message if an error occurs
+                    .foregroundColor(.red)
+                    .padding()
+            }
+            else if products.isEmpty {
+                Text("No products available.") // Message if no products are available
+                    .padding()
+            } else {
+                //                    List(products, id: \._id) { product in
+                //                        ProductRowView(product: product)
+                //                    }
+                //                    .listStyle(PlainListStyle())
+                
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: 20) {
+                        ForEach(products, id: \._id) { product in
+                            ProductRowView(product: product) // Reuse the product row view for each product
+                                .frame(maxWidth: .infinity) // Make each grid item take full width
+                                .background(Color.white) // Optional background color for the grid item
+                                .cornerRadius(10) // Optional corner radius for the grid item
+                                .shadow(radius: 5) // Optional shadow for visual effect
+                        }
+                    }
+                    .padding()
+                }
+            }
+            Spacer()
+        }
+        .onAppear{
+            Task {
                 await loadProducts()
             }
         }
@@ -80,6 +79,7 @@ struct ProductsView: View {
 struct ProductRowView: View {
     let product: Product
     
+    
     var body: some View {
         VStack {
             // Display product image
@@ -104,7 +104,8 @@ struct ProductRowView: View {
             
             Spacer()
         }
-        .padding(.vertical, 8)    }
+        .padding(.vertical, 8)
+    }
 }
 
 #Preview {
