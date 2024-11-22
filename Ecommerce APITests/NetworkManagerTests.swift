@@ -112,20 +112,28 @@ class NetworkManagerTests: XCTestCase {
     //    }
     
     
-//        func testAddToCart() async throws {
-//            try await ensureTokenIsSet()
-//            let addToCart = try await networkManager.addToCart(productId: "672457c799714013c00cbb89", quantity: 1)
-//            print(addToCart)
-//        }
+    //        func testAddToCart() async throws {
+    //            try await ensureTokenIsSet()
+    //            let addToCart = try await networkManager.addToCart(productId: "672457c799714013c00cbb89", quantity: 1)
+    //            print(addToCart)
+    //        }
     
-    func testCheckout() async throws {
+    //    func testCheckout() async throws {
+    //        try await ensureTokenIsSet()
+    //        let checkout = try await networkManager.checkoutCart()
+    //        print(checkout)
+    //    }
+    
+    func testCartInfo() async throws {
         try await ensureTokenIsSet()
-        let checkout = try await networkManager.checkoutCart()
-        print(checkout)
+                
+        let result = try await networkManager.cartInfo()
+        
+        print(result)
     }
-
-
-
+    
+    
+    
 }
 
 

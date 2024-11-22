@@ -68,7 +68,7 @@ public class NetworkManager {
     }
     
     
-    private func request<T: Codable>(endpoint: String, method: String = "GET", body: Data? = nil) async throws -> T {
+     func request<T: Codable>(endpoint: String, method: String = "GET", body: Data? = nil) async throws -> T {
         guard let url = URL(string: "\(baseURL)\(endpoint)")
         else {
             print("\(baseURL)\(endpoint)")
@@ -174,6 +174,23 @@ public class NetworkManager {
         if result.status != 200 {
             return Response(data: [] as! Cart, msg: result.msg, status: result.status)
         }
+        return Response(data: result.data, msg: result.msg, status: result.status)
+    }
+    
+    func cartInfo() async throws -> Response<Cart?> {
+        struct CartInfoResponse : Codable {
+            let data: Cart?
+            let msg: String
+            let status: Int
+        }
+        
+        let result: CartInfoResponse = try await request(endpoint: "/cart")
+        print("Result Cart Info: \(result)")
+        
+        if result.status != 200 {
+            return Response(data: nil, msg: result.msg, status: result.status)
+        }
+        
         return Response(data: result.data, msg: result.msg, status: result.status)
     }
     //

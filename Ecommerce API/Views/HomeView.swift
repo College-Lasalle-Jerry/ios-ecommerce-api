@@ -30,14 +30,22 @@ struct HomeView: View {
                     .tag(Tabs.address)
             }
         .navigationTitle(selectedTab.rawValue.capitalized)
+        
         .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
+            ToolbarItem(placement: .topBarTrailing) {
                 Button(action: logout){
                     Image(systemName: "power")
                         .foregroundStyle(.red)
                 }
             }
-            
+        }
+        .toolbar{
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink(destination: CartView()) {
+                    Image(systemName: "cart.fill")
+                        .foregroundStyle(.black)
+                }
+            }
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }

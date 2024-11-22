@@ -81,30 +81,36 @@ struct ProductRowView: View {
     
     
     var body: some View {
-        VStack {
-            // Display product image
-            AsyncImage(url: URL(string: product.imageUrl)) { image in
-                image
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 80, height: 80) // Adjust size as needed
-            } placeholder: {
-                Color.gray // Placeholder while loading
-                    .frame(width: 80, height: 80)
-            }
-            
-            VStack(alignment: .leading) {
-                Text(product.name)
-                    .font(.headline)
+        NavigationLink {
+            ProductDetailView(product: product)
+        } label: {
+            VStack {
+                // Display product image
+                AsyncImage(url: URL(string: product.imageUrl)) { image in
+                    image
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 80, height: 80) // Adjust size as needed
+                } placeholder: {
+                    Color.gray // Placeholder while loading
+                        .frame(width: 80, height: 80)
+                }
                 
-                Text("$\(product.price, specifier: "%.2f")") // Format price to 2 decimal places
-                    .font(.subheadline)
-                    .foregroundColor(.green)
+                VStack(alignment: .leading) {
+                    Text(product.name)
+                        .font(.headline)
+                    
+                    Text("$\(product.price, specifier: "%.2f")") // Format price to 2 decimal places
+                        .font(.subheadline)
+                        .foregroundColor(.green)
+                }
+                
+                Spacer()
             }
-            
-            Spacer()
+            .padding(.vertical, 8)
+
         }
-        .padding(.vertical, 8)
+
     }
 }
 
