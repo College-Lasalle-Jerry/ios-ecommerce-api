@@ -92,6 +92,7 @@ struct AddressView: View {
                 .background(Color.green)
                 .foregroundColor(.white)
                 .cornerRadius(8)
+                .disabled(newStreet.isEmpty || newCity.isEmpty || newState.isEmpty || newZip.isEmpty)
             }
             .padding()
         }
@@ -111,6 +112,7 @@ struct AddressView: View {
                 .background(Color.orange)
                 .foregroundColor(.white)
                 .cornerRadius(8)
+                .disabled(newStreet.isEmpty || newCity.isEmpty || newState.isEmpty || newZip.isEmpty)
             }
             .padding()
         }
@@ -124,7 +126,6 @@ struct AddressView: View {
     // Function to load addresses from the network
     private func loadAddresses() async {
         do {
-            print("Token address: \(NetworkManager.shared.token)")
             let response = try await NetworkManager.shared.fetchAddresses()
             if response.status == 200 {
                 addresses = response.data
@@ -141,6 +142,10 @@ struct AddressView: View {
     // Function to add a new address
     private func addAddress() async {
         do {
+            if newStreet.isEmpty || newCity.isEmpty || newState.isEmpty || newZip.isEmpty {
+                errorMessage = "Please fill out all fields"
+                return
+            }
             let response = try await NetworkManager.shared.addAddress(
                 street: newStreet,
                 city: newCity,
@@ -206,6 +211,11 @@ struct AddressView: View {
     
     private func editAddress(addressId: String) async {
         do {
+            if newStreet.isEmpty || newCity.isEmpty || newState.isEmpty || newZip.isEmpty {
+                errorMessage = "Please fill out all fields"
+                return
+            }
+
             let response = try await NetworkManager.shared.updateAddress(
                 addressId: addressId,
                 street: newStreet,

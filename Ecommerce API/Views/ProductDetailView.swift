@@ -69,6 +69,7 @@ struct ProductDetailView: View {
                         .cornerRadius(8)
                 }
                 .frame(maxWidth: .infinity)
+                .padding(.horizontal)
                 
                 Spacer()
             }        }
